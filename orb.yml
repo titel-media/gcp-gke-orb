@@ -113,7 +113,7 @@ jobs:
           deployment: "<<parameters.deployment>>"
           namespace: "<<parameters.namespace>>"
           container: "<<parameters.container>>"
-          image: "<<parameters.image>>"
+          image: "<<parameters.registry-url>>/$<<parameters.google-project-id>>/<<parameters.image>>:<<parameters.tag>>"
 
 example:
   publish-and-rollout-image:
