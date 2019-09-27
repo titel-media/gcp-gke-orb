@@ -73,6 +73,38 @@ commands:
               }" "https://api.datadoghq.com/api/v1/events?api_key=$<<parameters.api_key>>"
           name: Datadog - Sending Deploy Event
           when: on_success
+  notify-sentry:
+    description: Send a deploy event to Sentry
+    parameters:
+      api_key:
+        description: Sentry API Key
+        type: env_var_name
+        default: SENTRY_API_KEY
+      image:
+        description: Deployed image
+        type: string
+    steps:
+      - run:
+          command: |
+            if [[ -z "$<<parameters.api_key>>" ]]; then
+              echo "Skipping Sentry notification as SENTRY_API_KEY not set"
+            else
+              curl  -XPOST -s -H 'Content-Type: application/json' \
+                -H "Authorization: Bearer $<<parameters.api_key>>" --data \
+                "{
+                  \"version\": \"<<parameters.image>>\",
+                  \"url\":\"$CIRCLE_BUILD_URL\",
+                  \"refs\":[{
+                    \"repository\":\"$CIRCLE_PROJECT_REPONAME\",
+                    \"commit\":\"$CIRCLE_SHA1
+                  \"}],
+                  \"projects\":[
+                    \"$CIRCLE_PROJECT_REPONAME
+                  \"]
+                }" "https://sentry.io/api/0/organizations/titelmedia-gmbh/releases/"
+            fi
+          name: Sentry - Sending Deploy Event
+          when: on_success
 
 jobs:
   publish-and-rollout-image:
@@ -149,7 +181,8 @@ jobs:
           image: "<<parameters.registry-url>>/$<<parameters.google-project-id>>/<<parameters.image>>:<<parameters.tag>>"
       - notify-datadog:
           image: "<<parameters.image>>:<<parameters.tag>>"
-
+      - notify-sentry:
+          image: "<<parameters.image>>:<<parameters.tag>>"
 example:
   publish-and-rollout-image:
     description: |
