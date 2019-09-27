@@ -80,8 +80,8 @@ commands:
         description: Sentry API Key
         type: env_var_name
         default: SENTRY_API_KEY
-      image:
-        description: Deployed image
+      version:
+        description: Release version
         type: string
       organization:
         description: Sentry organization slug
@@ -96,7 +96,7 @@ commands:
               curl  -XPOST -s -H 'Content-Type: application/json' \
                 -H "Authorization: Bearer $<<parameters.api_key>>" --data \
                 "{
-                  \"version\": \"<<parameters.image>>\",
+                  \"version\": \"<<parameters.version>>\",
                   \"url\":\"$CIRCLE_BUILD_URL\",
                   \"refs\":[{
                     \"repository\":\"$CIRCLE_PROJECT_REPONAME\",
@@ -140,7 +140,7 @@ commands:
                 \"username\":\"<<parameters.username>>\",
                 \"text\":\"<<parameters.text>>\",
                 \"icon_emoji\": \"$emoji\"
-              }" <<parameters.web_hook>>
+              }" $<<parameters.web_hook>>
             fi
           name: Slack - Sending Deploy Event
           when: on_success
@@ -221,9 +221,9 @@ jobs:
       - notify-datadog:
           image: "<<parameters.image>>:<<parameters.tag>>"
       - notify-sentry:
-          image: "<<parameters.image>>:<<parameters.tag>>"
+          version: "<<parameters.image>>.<<parameters.tag>>"
       - notify-slack:
-          text: "Oh boy! Successfully deployed *$<<parameters.image>>:<<parameters.tag>>*"
+          text: "Successfully deployed *$<<parameters.image>>:<<parameters.tag>>*\n\nBuild by $CIRCLE_USERNAME\ncheck out the changes: $CIRCLE_COMPARE_URL"
 example:
   publish-and-rollout-image:
     description: |
