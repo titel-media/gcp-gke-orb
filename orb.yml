@@ -70,7 +70,7 @@ commands:
                   \"job:$CIRCLE_JOB\",
                   \"started_by:$CIRCLE_USERNAME\"
                 ]
-              }" "https://api.datadoghq.com/api/v1/events?api_key=<<parameters.api_key>>"
+              }" "https://api.datadoghq.com/api/v1/events?api_key=$<<parameters.api_key>>"
           name: Datadog - Sending Deploy Event
           when: on_success
 
