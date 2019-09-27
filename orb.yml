@@ -149,6 +149,8 @@ jobs:
   publish-and-rollout-image:
     description: "Update cluster with new Docker image."
     machine: true
+    environment:
+      GIT_COMMIT_DESC: git log --format=%B -n 1 $CIRCLE_SHA1
     parameters:
       cluster:
         description: "The Kubernetes cluster name."
@@ -221,9 +223,11 @@ jobs:
       - notify-datadog:
           image: "<<parameters.image>>:<<parameters.tag>>"
       - notify-sentry:
-          version: "<<parameters.image>>.<<parameters.tag>>"
+          version: "$CIRCLE_PROJECT_REPONAME:<<parameters.tag>>"
       - notify-slack:
-          text: "Successfully deployed *$<<parameters.image>>:<<parameters.tag>>*\n\nBuild by $CIRCLE_USERNAME\ncheck out the changes: $CIRCLE_COMPARE_URL"
+          text: "Deployed *<<parameters.image>>:<<parameters.tag>>*
+            [Build]($CIRCLE_BUILD_URL) by: [$CIRCLE_USERNAME](https://github.com/$CIRCLE_USERNAME)
+            message: $GIT_COMMIT_DESC"
 example:
   publish-and-rollout-image:
     description: |
