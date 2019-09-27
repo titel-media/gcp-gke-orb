@@ -40,6 +40,39 @@ commands:
       - run: |
           gcloud container clusters get-credentials <<parameters.cluster>>
           kubectl -n <<parameters.namespace>> set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>
+  notify-datadog:
+    description: Send a deploy event to DataDog
+    parameters:
+      api_key:
+        description: Datadog API Key
+        type: env_var_name
+        default: DATADOG_API_KEY
+      image:
+        description: Deployed image
+        type: string
+    steps:
+      - run:
+          command: |
+            curl -X POST -H "Content-type: application/json" --data \
+              "{
+                \"title\": \"Deployed <<parameters.image>>\",
+                \"text\": \"Oh boy! New deployment for $CIRCLE_PROJECT_REPONAME on $CIRCLE_BRANCH. See more information here: $CIRCLE_BUILD_URL\",
+                \"priority\": \"normal\",
+                \"alert_type\": \"info\",
+                \"source_type_name\": \"circleci\",
+                \"aggregation_key\": \"deploys\",
+                \"tags\": [
+                  \"kube_deployment:$CIRCLE_PROJECT_REPONAME\",
+                  \"repository:$CIRCLE_PROJECT_REPONAME\",
+                  \"organization:$CIRCLE_PROJECT_USERNAME\",
+                  \"branch:$CIRCLE_BRANCH\",
+                  \"build_num:$CIRCLE_BUILD_NUM\",
+                  \"job:$CIRCLE_JOB\",
+                  \"started_by:$CIRCLE_USERNAME\"
+                ]
+              }" "https://api.datadoghq.com/api/v1/events?api_key=<<parameters.api_key>>"
+          name: Datadog - Sending Deploy Event
+          when: on_success
 
 jobs:
   publish-and-rollout-image:
@@ -114,11 +147,13 @@ jobs:
           namespace: "<<parameters.namespace>>"
           container: "<<parameters.container>>"
           image: "<<parameters.registry-url>>/$<<parameters.google-project-id>>/<<parameters.image>>:<<parameters.tag>>"
+      - notify-datadog:
+          image: "<<parameters.image>>:<<parameters.tag>>"
 
 example:
   publish-and-rollout-image:
     description: |
-      "The simplest example of using this Orb. Logs into GCP, builds and 
+      "The simplest example of using this Orb. Logs into GCP, builds and
       publishes a Docker image, and then rolls the image out to a GKE cluster."
     usage:
       version: 2.1
