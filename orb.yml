@@ -96,10 +96,10 @@ commands:
                   \"url\":\"$CIRCLE_BUILD_URL\",
                   \"refs\":[{
                     \"repository\":\"$CIRCLE_PROJECT_REPONAME\",
-                    \"commit\":\"$CIRCLE_SHA1
+                    \"commit\":\"$CIRCLE_SHA1\"
                   \"}],
                   \"projects\":[
-                    \"$CIRCLE_PROJECT_REPONAME
+                    \"$CIRCLE_PROJECT_REPONAME\"
                   \"]
                 }" "https://sentry.io/api/0/organizations/titelmedia-gmbh/releases/"
             fi
