@@ -103,7 +103,7 @@ commands:
                     \"commit\":\"$CIRCLE_SHA1\"
                   }],
                   \"projects\":[
-                    \"$CIRCLE_PROJECT_REPONAME\"
+                    \"$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME\"
                   ]
                 }" "https://sentry.io/api/0/organizations/<<parameters.organization>>/releases/"
             fi
@@ -134,6 +134,7 @@ commands:
             if [[ -z "$<<parameters.web_hook>>" ]]; then
               echo "Skipping Slack notification as <<parameters.web_hook>> not set"
             else
+              GIT_COMMIT_DESC="$(git log --format=%B -n 1 $CIRCLE_SHA1)"
               emoji=$(echo :computer: :cool: :8ball: :thumbsup_all: | xargs -n1 echo | sort -R | head -n1)
               curl -XPOST --data-urlencode "payload={
                 \"channel\":\"<<parameters.channel>>\",
@@ -149,8 +150,6 @@ jobs:
   publish-and-rollout-image:
     description: "Update cluster with new Docker image."
     machine: true
-    environment:
-      GIT_COMMIT_DESC: git log --format=%B -n 1 $CIRCLE_SHA1
     parameters:
       cluster:
         description: "The Kubernetes cluster name."
@@ -226,7 +225,9 @@ jobs:
           version: "$CIRCLE_PROJECT_REPONAME:<<parameters.tag>>"
       - notify-slack:
           text: "Deployed *<<parameters.image>>:<<parameters.tag>>*
-            [Build]($CIRCLE_BUILD_URL) by: [$CIRCLE_USERNAME](https://github.com/$CIRCLE_USERNAME)
+
+            <$CIRCLE_BUILD_URL|Build> by: <https://github.com/$CIRCLE_USERNAME|$CIRCLE_USERNAME>
+
             message: $GIT_COMMIT_DESC"
 example:
   publish-and-rollout-image:
