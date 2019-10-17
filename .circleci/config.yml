@@ -40,4 +40,4 @@ jobs:
       - checkout
       - run:
           name: "Publish orb via the CircleCI CLI"
-          command: circleci orb publish orb.yml circleci/gcp-gke@${CIRCLE_TAG}
+          command: circleci orb publish orb.yml titel-media/gcp-gke@${CIRCLE_TAG}
