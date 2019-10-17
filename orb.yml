@@ -204,7 +204,7 @@ jobs:
           image: <<parameters.image>>
           tag: <<parameters.tag>>
 
- rollout-image:
+  rollout-image:
     description: "Update cluster with new Docker image."
     machine: true
     parameters:
