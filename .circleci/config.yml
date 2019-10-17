@@ -17,6 +17,8 @@ workflows:
               # Simplified SemVer regex
               only: /^\d+\.\d+\.\d+$/
       - publish:
+          requires:
+            - test
           filters:
             branches:
               ignore: /.*/
