@@ -159,6 +159,10 @@ jobs:
         description: The Google project ID to connect with via the gcloud CLI
         type: env_var_name
         default: GOOGLE_PROJECT_ID
+      google-compute-zone:
+        description: The Google compute zone to connect with via the gcloud CLI
+        type: env_var_name
+        default: GOOGLE_COMPUTE_ZONE
       registry-url:
         description: The GCR registry URL from ['', us, eu, asia].gcr.io
         type: string
