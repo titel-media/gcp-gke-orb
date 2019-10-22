@@ -378,6 +378,12 @@ jobs:
           namespace: "<<parameters.namespace>>"
           container: "<<parameters.container>>"
           image: "<<parameters.registry-url>>/$<<parameters.google-project-id>>/<<parameters.image>>:<<parameters.tag>>"
+      - gcr/tag-image:
+          registry-url: <<parameters.registry-url>>
+          google-project-id: <<parameters.google-project-id>>
+          image: <<parameters.image>>
+          source-tag: <<parameters.tag>>
+          target-tag: "<<parameters.stable-tag>>"
       - gcr/push-image:
           registry-url: <<parameters.registry-url>>
           google-project-id: <<parameters.google-project-id>>
