@@ -317,6 +317,10 @@ jobs:
         description: A docker image tag
         type: string
         default: "latest"
+      stable-tag:
+        description: A docker image tag added after a successful image rollout
+        type: string
+        default: "$CIRCLE_BRANCH.stable"
       path-to-dockerfile:
         description: The relative path to the Dockerfile to use when building image
         type: string
@@ -353,6 +357,11 @@ jobs:
           namespace: "<<parameters.namespace>>"
           container: "<<parameters.container>>"
           image: "<<parameters.registry-url>>/$<<parameters.google-project-id>>/<<parameters.image>>:<<parameters.tag>>"
+      - gcr/push-image:
+          registry-url: <<parameters.registry-url>>
+          google-project-id: <<parameters.google-project-id>>
+          image: <<parameters.image>>
+          tag: "<<parameters.stable-tag>>"
       - notify-datadog:
           image: "<<parameters.image>>:<<parameters.tag>>"
       - notify-sentry:
