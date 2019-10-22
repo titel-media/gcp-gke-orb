@@ -17,6 +17,15 @@ commands:
     description: "Initialize the `gcloud` CLI."
     steps:
       - gcloud/initialize
+  checkout-submodule:
+    description: "checkout repo with submodules"
+    steps:
+      - checkout
+      - run:
+          name: "Pull Submodules"
+          command: |
+            git submodule init
+            git submodule update
   rollout-image:
     description: "Update a deployment's Docker image."
     parameters:
@@ -185,12 +194,7 @@ jobs:
           Extra flags to pass to docker build. For examples, see
           https://docs.docker.com/engine/reference/commandline/build
     steps:
-      - checkout
-      - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
+      - checkout-submodule
       - attach_workspace:
           at: ./
       - gcr/gcr-auth:
@@ -251,12 +255,7 @@ jobs:
         type: string
         default: "latest"
     steps:
-      - checkout
-      - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
+      - checkout-submodule
       - gcr/gcr-auth:
           google-project-id: <<parameters.google-project-id>>
           google-compute-zone: <<parameters.google-compute-zone>>
@@ -329,12 +328,7 @@ jobs:
           Extra flags to pass to docker build. For examples, see
           https://docs.docker.com/engine/reference/commandline/build
     steps:
-      - checkout
-      - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
+      - checkout-submodule
       - attach_workspace:
           at: ./
       - gcr/gcr-auth:
