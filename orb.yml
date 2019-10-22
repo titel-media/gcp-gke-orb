@@ -35,6 +35,7 @@ commands:
       deployment:
         description: "The Kubernetes deployment name."
         type: string
+        default: ""
       container:
         description: "The Kubernetes container name."
         type: string
@@ -48,7 +49,24 @@ commands:
     steps:
       - run: |
           gcloud container clusters get-credentials <<parameters.cluster>>
-          kubectl -n <<parameters.namespace>> set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>
+          if [ "x<<parameters.deployment>>" == "x" ] ; then
+            _buildless_image=$(echo "<<parameters.image>>" | rev | cut -d. -f2- | rev)
+            echo "Detecting resources that have a image starting with: $_buildless_image"
+            for data in $(kubectl get --all-namespaces cronjob,deployment -o json | jq -c --arg img "${_buildless_image}" '.items[] | .kind as $kind | .metadata.name as $name | .metadata.namespace as $namespace | ((if .kind == "CronJob" then .spec.jobTemplate else . end) | .spec.template.spec.containers[]) | select(.image | startswith($img)) | {container: .name, name: $name, namespace: $namespace, kind: $kind}'); do
+              echo "Found resource: $data"
+              namespace=$(echo $data | jq -r .namespace)
+              name=$(echo $data | jq -r .name)
+              kind=$(echo $data | jq -r .kind)
+              container=$(echo $data | jq -r .container)
+              kubectl -n $namespace set image $kind/$name ${container}=<<parameters.image>>
+              if test "$kind" = "Deployment"; then
+                kubectl -n $namespace rollout status $kind/$name
+              fi
+            done
+          else
+            kubectl -n <<parameters.namespace>> set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>
+            kubectl -n <<parameters.namespace>> rollout status deployment <<parameters.deployment>>
+          fi
   notify-datadog:
     description: Send a deploy event to DataDog
     parameters:
@@ -287,6 +305,7 @@ jobs:
       deployment:
         description: "The Kubernetes deployment name."
         type: string
+        default: ""
       namespace:
         description: "The Kubernetes namespace name."
         type: string
