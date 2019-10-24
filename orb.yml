@@ -17,6 +17,15 @@ commands:
     description: "Initialize the `gcloud` CLI."
     steps:
       - gcloud/initialize
+  checkout-submodule:
+    description: "checkout repo with submodules"
+    steps:
+      - checkout
+      - run:
+          name: "Pull Submodules"
+          command: |
+            git submodule init
+            git submodule update
   rollout-image:
     description: "Update a deployment's Docker image."
     parameters:
@@ -26,6 +35,7 @@ commands:
       deployment:
         description: "The Kubernetes deployment name."
         type: string
+        default: ""
       container:
         description: "The Kubernetes container name."
         type: string
@@ -37,9 +47,28 @@ commands:
         type: string
         default: "default"
     steps:
-      - run: |
-          gcloud container clusters get-credentials <<parameters.cluster>>
-          kubectl -n <<parameters.namespace>> set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>
+      - run:
+          name: Rollout image
+          command: |
+            gcloud container clusters get-credentials <<parameters.cluster>>
+            if [ "x<<parameters.deployment>>" == "x" ] ; then
+              _buildless_image=$(echo "<<parameters.image>>" | rev | cut -d. -f2- | rev)
+              echo "Detecting resources that have a image starting with: $_buildless_image"
+              for data in $(kubectl get --all-namespaces cronjob,deployment -o json | jq -c --arg img "${_buildless_image}" '.items[] | .kind as $kind | .metadata.name as $name | .metadata.namespace as $namespace | ((if .kind == "CronJob" then .spec.jobTemplate else . end) | .spec.template.spec.containers[]) | select(.image | startswith($img)) | {container: .name, name: $name, namespace: $namespace, kind: $kind}'); do
+                echo "Found resource: $data"
+                namespace=$(echo $data | jq -r .namespace)
+                name=$(echo $data | jq -r .name)
+                kind=$(echo $data | jq -r .kind)
+                container=$(echo $data | jq -r .container)
+                kubectl -n $namespace set image $kind/$name ${container}=<<parameters.image>>
+                if test "$kind" = "Deployment"; then
+                  kubectl -n $namespace rollout status $kind/$name
+                fi
+              done
+            else
+              kubectl -n <<parameters.namespace>> set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>
+              kubectl -n <<parameters.namespace>> rollout status deployment <<parameters.deployment>>
+            fi
   notify-datadog:
     description: Send a deploy event to DataDog
     parameters:
@@ -185,12 +214,7 @@ jobs:
           Extra flags to pass to docker build. For examples, see
           https://docs.docker.com/engine/reference/commandline/build
     steps:
-      - checkout
-      - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
+      - checkout-submodule
       - attach_workspace:
           at: ./
       - gcr/gcr-auth:
@@ -251,12 +275,7 @@ jobs:
         type: string
         default: "latest"
     steps:
-      - checkout
-      - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
+      - checkout-submodule
       - gcr/gcr-auth:
           google-project-id: <<parameters.google-project-id>>
           google-compute-zone: <<parameters.google-compute-zone>>
@@ -288,6 +307,7 @@ jobs:
       deployment:
         description: "The Kubernetes deployment name."
         type: string
+        default: ""
       namespace:
         description: "The Kubernetes namespace name."
         type: string
@@ -318,6 +338,10 @@ jobs:
         description: A docker image tag
         type: string
         default: "latest"
+      stable-tag:
+        description: A docker image tag added after a successful image rollout
+        type: string
+        default: "$CIRCLE_BRANCH.stable"
       path-to-dockerfile:
         description: The relative path to the Dockerfile to use when building image
         type: string
@@ -329,12 +353,7 @@ jobs:
           Extra flags to pass to docker build. For examples, see
           https://docs.docker.com/engine/reference/commandline/build
     steps:
-      - checkout
-      - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
+      - checkout-submodule
       - attach_workspace:
           at: ./
       - gcr/gcr-auth:
@@ -359,6 +378,12 @@ jobs:
           namespace: "<<parameters.namespace>>"
           container: "<<parameters.container>>"
           image: "<<parameters.registry-url>>/$<<parameters.google-project-id>>/<<parameters.image>>:<<parameters.tag>>"
+      - gcr/tag-image:
+          registry-url: <<parameters.registry-url>>
+          google-project-id: <<parameters.google-project-id>>
+          image: <<parameters.image>>
+          source-tag: <<parameters.tag>>
+          target-tag: "<<parameters.stable-tag>>"
       - notify-datadog:
           image: "<<parameters.image>>:<<parameters.tag>>"
       - notify-sentry:
