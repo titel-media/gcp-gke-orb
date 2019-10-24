@@ -11,7 +11,11 @@ executors:
 workflows:
   main:
     jobs:
-      - test
+      - test:
+          filters:
+            tags:
+              # Simplified SemVer regex
+              only: /^\d+\.\d+\.\d+$/
       - publish:
           requires:
             - test
