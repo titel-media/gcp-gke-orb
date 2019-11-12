@@ -207,6 +207,10 @@ jobs:
         description: The relative path to the Dockerfile to use when building image
         type: string
         default: "."
+      dockerfile:
+        description: Name of dockerfile to use
+        type: string
+        default: "Dockerfile"
       extra_build_args:
         type: string
         default: ""
@@ -222,6 +226,7 @@ jobs:
           google-compute-zone: <<parameters.google-compute-zone>>
       - install
       - gcr/build-image:
+          dockerfile: <<parameters.dockerfile>>
           registry-url: <<parameters.registry-url>>
           google-project-id: <<parameters.google-project-id>>
           image: <<parameters.image>>
@@ -346,6 +351,10 @@ jobs:
         description: The relative path to the Dockerfile to use when building image
         type: string
         default: "."
+      dockerfile:
+        description: Name of dockerfile to use
+        type: string
+        default: "Dockerfile"
       extra_build_args:
         type: string
         default: ""
@@ -361,6 +370,7 @@ jobs:
           google-compute-zone: <<parameters.google-compute-zone>>
       - install
       - gcr/build-image:
+          dockerfile: <<parameters.dockerfile>>
           registry-url: <<parameters.registry-url>>
           google-project-id: <<parameters.google-project-id>>
           image: <<parameters.image>>
