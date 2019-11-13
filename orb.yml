@@ -112,6 +112,10 @@ commands:
       version:
         description: Release version
         type: string
+      environment:
+        description: The environment the build is deploying to
+        type: env_var_name
+        default: ENVIRONMENT
       organization:
         description: Sentry organization slug
         type: string
@@ -125,16 +129,9 @@ commands:
               curl  -XPOST -s -H 'Content-Type: application/json' \
                 -H "Authorization: Bearer $<<parameters.api_key>>" --data \
                 "{
-                  \"version\": \"<<parameters.version>>\",
-                  \"url\":\"$CIRCLE_BUILD_URL\",
-                  \"refs\":[{
-                    \"repository\":\"$CIRCLE_PROJECT_REPONAME\",
-                    \"commit\":\"$CIRCLE_SHA1\"
-                  }],
-                  \"projects\":[
-                    \"$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME\"
-                  ]
-                }" "https://sentry.io/api/0/organizations/<<parameters.organization>>/releases/"
+                  \"environment\":\"$<<parameters.environment>>\",
+                  \"url\":\"$CIRCLE_BUILD_URL\"
+                }" "https://sentry.io/api/0/organizations/<<parameters.organization>>/releases/<<parameters.tag>>/deploys/"
             fi
           name: Sentry - Sending Deploy Event
           when: on_success
