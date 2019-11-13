@@ -131,7 +131,7 @@ commands:
                 "{
                   \"environment\":\"$<<parameters.environment>>\",
                   \"url\":\"$CIRCLE_BUILD_URL\"
-                }" "https://sentry.io/api/0/organizations/<<parameters.organization>>/releases/<<parameters.tag>>/deploys/"
+                }" "https://sentry.io/api/0/organizations/<<parameters.organization>>/releases/$CIRCLE_BRANCH.b$CIRCLE_BUILD_NUM/deploys/"
             fi
           name: Sentry - Sending Deploy Event
           when: on_success
