@@ -67,6 +67,7 @@ jobs:
       - run:
           name: "Publish orb via the CircleCI CLI"
           command: |
+            CIRCLE_PR_NUMBER=$(echo $CI_PULL_REQUEST | cut -d/ -f7)
             if [ "x" != "x$CIRCLE_PR_NUMBER" ]; then
               circleci orb publish orb.yml titel-media/gcp-gke@dev-pr-${CIRCLE_PR_NUMBER}
             else
