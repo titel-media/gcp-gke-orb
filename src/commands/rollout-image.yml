@@ -1,8 +1,5 @@
 description: "Update a deployment's Docker image."
 parameters:
-  cluster:
-    description: "The Kubernetes cluster name."
-    type: string
   deployment:
     description: "The Kubernetes deployment name."
     type: string
@@ -21,7 +18,6 @@ steps:
   - run:
       name: Rollout image
       command: |
-        gcloud container clusters get-credentials <<parameters.cluster>>
         if [ "x<<parameters.deployment>>" == "x" ] ; then
           _buildless_image=$(echo "<<parameters.image>>" | rev | cut -d. -f2- | rev)
           echo "Detecting resources that have a image starting with: $_buildless_image"
