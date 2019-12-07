@@ -3,11 +3,6 @@ version: 2.1
 orbs:
   cli: circleci/circleci-cli@0.1.4
 
-executors:
-  cibuilds:
-    docker:
-      - image: cibuilds/base:2019.06
-
 workflows:
   main:
     jobs:
@@ -16,6 +11,15 @@ workflows:
             tags:
               # Simplified SemVer regex
               only: /^\d+\.\d+\.\d+$/
+      - publish-dev:
+          requires:
+            - test
+          filters:
+            branches:
+              ignore: master
+            tags:
+              ignore: /.*/
+          context: orb-publishing
       - publish:
           requires:
             - test
@@ -28,20 +32,44 @@ workflows:
           context: orb-publishing
 
 jobs:
-  test:
-    executor: cibuilds
-    steps:
-      - checkout
-      - cli/install
-      - run:
-          name: "Validate Orb config"
-          command: circleci orb validate orb.yml
-  publish:
+  pack:
     executor: cli/default
     steps:
       - checkout
       - run:
+          name: "Pack Orb into a single file"
+          command: circleci config pack src > orb.yml
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - orb.yml
+  test:
+    executor: cli/default
+    steps:
+      - attach_workspace:
+          at: ./
+      - run:
+          name: "Validate Orb config"
+          command: circleci orb validate orb.yml
+  publish-dev:
+    description: Publish PR's to dev releases on Orb registry
+    executor: cli/default
+    steps:
+      - attach_workspace:
+          at: ./
+      - run:
           name: "Publish orb via the CircleCI CLI"
           command: |
-            circleci config pack src > orb.yml
-            circleci orb publish orb.yml titel-media/gcp-gke@${CIRCLE_TAG}
+            if [ "x" != "x$CIRCLE_PR_NUMBER" ]; then
+              circleci orb publish orb.yml titel-media/gcp-gke@dev-pr-${CIRCLE_PR_NUMBER}
+            else
+              echo "Skipping dev orb publising as build is not attached to a pull request"
+            fi
+  publish:
+    executor: cli/default
+    steps:
+      - attach_workspace:
+          at: ./
+      - run:
+          name: "Publish orb via the CircleCI CLI"
+          command: circleci orb publish orb.yml titel-media/gcp-gke@${CIRCLE_TAG}
