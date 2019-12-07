@@ -3,14 +3,23 @@ version: 2.1
 orbs:
   cli: circleci/circleci-cli@0.1.4
 
+resources:
+  semver_tags: &semver_tags
+    tags:
+      # Simplified SemVer regex
+      only: /^\d+\.\d+\.\d+$/
+
 workflows:
   main:
     jobs:
-      - test:
+      - pack:
           filters:
-            tags:
-              # Simplified SemVer regex
-              only: /^\d+\.\d+\.\d+$/
+            <<: *semver_tags
+      - test:
+          requires:
+            - pack
+          filters:
+            <<: *semver_tags
       - publish-dev:
           requires:
             - test
@@ -24,11 +33,9 @@ workflows:
           requires:
             - test
           filters:
+            <<: *semver_tags
             branches:
               ignore: /.*/
-            tags:
-              # Simplified SemVer regex
-              only: /^\d+\.\d+\.\d+$/
           context: orb-publishing
 
 jobs:
