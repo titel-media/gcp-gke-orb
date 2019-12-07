@@ -1,0 +1,35 @@
+description: Send a deploy event to Slack
+parameters:
+  web_hook:
+    description: Slack Webhook URL
+    type: env_var_name
+    default: SLACK_WEBHOOK_URL
+  text:
+    description: Message to post to slack
+    type: string
+    default: "Oh boy!"
+  channel:
+    description: Slack channel to post message
+    type: string
+    default: "#deployments"
+  username:
+    description: Slack username to send message as
+    type: string
+    default: webhookbot
+steps:
+  - run:
+      command: |
+        if [[ -z "$<<parameters.web_hook>>" ]]; then
+          echo "Skipping Slack notification as <<parameters.web_hook>> not set"
+        else
+          GIT_COMMIT_DESC="$(git log --format=%B -n 1 $CIRCLE_SHA1)"
+          emoji=$(echo :computer: :cool: :8ball: :thumbsup_all: | xargs -n1 echo | sort -R | head -n1)
+          curl -XPOST --data-urlencode "payload={
+            \"channel\":\"<<parameters.channel>>\",
+            \"username\":\"<<parameters.username>>\",
+            \"text\":\"<<parameters.text>>\",
+            \"icon_emoji\": \"$emoji\"
+          }" $<<parameters.web_hook>>
+        fi
+      name: Slack - Sending Deploy Event
+      when: on_success

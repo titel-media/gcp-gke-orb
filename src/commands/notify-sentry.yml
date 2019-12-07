@@ -1,0 +1,32 @@
+description: Send a deploy event to Sentry
+parameters:
+  api_key:
+    description: Sentry API Key
+    type: env_var_name
+    default: SENTRY_API_KEY
+  version:
+    description: Release version
+    type: string
+  environment:
+    description: The environment the build is deploying to
+    type: env_var_name
+    default: ENVIRONMENT
+  organization:
+    description: Sentry organization slug
+    type: string
+    default: titelmedia-gmbh
+steps:
+  - run:
+      command: |
+        if [[ -z "$<<parameters.api_key>>" ]]; then
+          echo "Skipping Sentry notification as SENTRY_API_KEY not set"
+        else
+          curl  -XPOST -s -H 'Content-Type: application/json' \
+            -H "Authorization: Bearer $<<parameters.api_key>>" --data \
+            "{
+              \"environment\":\"$<<parameters.environment>>\",
+              \"url\":\"$CIRCLE_BUILD_URL\"
+            }" "https://sentry.io/api/0/organizations/<<parameters.organization>>/releases/$CIRCLE_BRANCH.b$CIRCLE_BUILD_NUM/deploys/"
+        fi
+      name: Sentry - Sending Deploy Event
+      when: on_success

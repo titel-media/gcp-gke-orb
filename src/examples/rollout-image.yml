@@ -1,0 +1,17 @@
+description: |
+  "Rolls out a published Docker image to a GKE cluster. Can be used to parallelize deployments and
+  reduce deployment time after a manual approval step."
+usage:
+  version: 2.1
+  orbs:
+    gke: titel-media/gcp-gke@0.2.3
+  workflows:
+    main:
+      jobs:
+        - build
+        - gke/publish-image:
+            image: orb-badge-server
+            tag: "2"
+        - gke/rollout-image:
+            image: orb-badge-server
+            tag: "2"
