@@ -43,8 +43,9 @@ steps:
       google-project-id: <<parameters.google-project-id>>
       google-compute-zone: <<parameters.google-compute-zone>>
   - install
-  - rollout-image:
+  - get-cluster-credentials:
       cluster: "<<parameters.cluster>>"
+  - rollout-image:
       deployment: "<<parameters.deployment>>"
       namespace: "<<parameters.namespace>>"
       container: "<<parameters.container>>"

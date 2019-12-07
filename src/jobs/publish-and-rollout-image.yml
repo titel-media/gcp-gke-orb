@@ -77,8 +77,9 @@ steps:
       google-project-id: <<parameters.google-project-id>>
       image: <<parameters.image>>
       tag: <<parameters.tag>>
-  - rollout-image:
+  - get-cluster-credentials:
       cluster: "<<parameters.cluster>>"
+  - rollout-image:
       deployment: "<<parameters.deployment>>"
       namespace: "<<parameters.namespace>>"
       container: "<<parameters.container>>"
