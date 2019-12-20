@@ -42,12 +42,12 @@ parameters:
     description: A docker image tag added after a successful image rollout
     type: string
     default: "$CIRCLE_BRANCH.stable"
-  path-to-dockerfile:
-    description: The relative path to the Dockerfile to use when building image
+  cwd-path-for-build:
+    description: The relative path from where docker will start the build of the image
     type: string
     default: "."
   dockerfile:
-    description: Name of dockerfile to use
+    description: Path and name of dockerfile to use
     type: string
     default: "Dockerfile"
   extra_build_args:
@@ -70,7 +70,7 @@ steps:
       google-project-id: <<parameters.google-project-id>>
       image: <<parameters.image>>
       tag: << parameters.tag >>
-      path: <<parameters.path-to-dockerfile>>
+      path: <<parameters.cwd-path-for-build>>
       extra_build_args: <<parameters.extra_build_args>>
   - gcr/push-image:
       registry-url: <<parameters.registry-url>>
