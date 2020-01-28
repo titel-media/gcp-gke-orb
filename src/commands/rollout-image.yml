@@ -27,12 +27,12 @@ steps:
             name=$(echo $data | jq -r .name)
             kind=$(echo $data | jq -r .kind)
             container=$(echo $data | jq -r .container)
-            kubectl -n $namespace set image $kind/$name ${container}=<<parameters.image>>
+            kubectl -n $namespace set image $kind/$name ${container}=<<parameters.image>> --record=true
             if test "$kind" = "Deployment"; then
               kubectl -n $namespace rollout status $kind/$name
             fi
           done
         else
-          kubectl -n <<parameters.namespace>> set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>>
+          kubectl -n <<parameters.namespace>> set image deployment <<parameters.deployment>> <<parameters.container>>=<<parameters.image>> --record=true
           kubectl -n <<parameters.namespace>> rollout status deployment <<parameters.deployment>>
         fi
