@@ -73,6 +73,10 @@ steps:
       tag: << parameters.tag >>
       path: <<parameters.cwd-path-for-build>>
       extra_build_args: <<parameters.extra_build_args>>
+  - when:
+      condition: $WIREGUARD_CONFIG
+      steps:
+        - vpn/connect
   - gcr/push-image:
       registry-url: <<parameters.registry-url>>
       google-project-id: <<parameters.google-project-id>>
