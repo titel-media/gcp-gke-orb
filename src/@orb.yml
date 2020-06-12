@@ -5,4 +5,4 @@ orbs:
   gcloud: circleci/gcp-cli@1.0.6
   gcr: circleci/gcp-gcr@0.6.1
   k8s: circleci/kubernetes@0.1.0
-  vpn: titel-media/wireguard@0.0.8
+  vpn: titel-media/wireguard@0.1.0
