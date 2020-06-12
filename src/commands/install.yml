@@ -6,3 +6,4 @@ steps:
       condition: $WIREGUARD_CONFIG
       steps:
         - vpn/install
+        - vpn/initialize
