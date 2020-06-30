@@ -1,5 +1,6 @@
 description: "Update cluster with new Docker image."
-machine: true
+machine: 
+  image: ubuntu-1604:202004-01
 parameters:
   cluster:
     description: "The Kubernetes cluster name."
