@@ -1,5 +1,5 @@
 description: "Update cluster with new Docker image."
-machine: 
+machine:
   image: ubuntu-1604:202004-01
 parameters:
   cluster:
@@ -57,11 +57,6 @@ parameters:
     description: >
       Extra flags to pass to docker build. For examples, see
       https://docs.docker.com/engine/reference/commandline/build
-  disable_vpn:
-    type: string
-    default: ""
-    description: >
-      Avoid connecting to the VPN if value provided
 steps:
   - add_ssh_keys
   - checkout-submodule
@@ -79,10 +74,6 @@ steps:
       tag: << parameters.tag >>
       path: <<parameters.cwd-path-for-build>>
       extra_build_args: <<parameters.extra_build_args>>
-  - unless:
-      condition: <<parameters.disable_vpn>>
-      steps:
-        - vpn/connect
   - gcr/push-image:
       registry-url: <<parameters.registry-url>>
       google-project-id: <<parameters.google-project-id>>

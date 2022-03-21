@@ -25,7 +25,7 @@ workflows:
             - test
           filters:
             branches:
-              ignore: master
+              ignore: main
             tags:
               ignore: /.*/
           context: orb-publishing
