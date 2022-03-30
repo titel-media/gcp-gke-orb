@@ -1,6 +1,7 @@
 description: "Update cluster with new Docker image."
-machine:
-  image: ubuntu-1604:202004-01
+docker:
+  - image: google/cloud-sdk:377.0.0
+circleci_ip_ranges: true
 parameters:
   cluster:
     description: "The Kubernetes cluster name."
@@ -60,6 +61,9 @@ parameters:
 steps:
   - add_ssh_keys
   - checkout-submodule
+  - setup_remote_docker:
+      version: 20.10.11
+      docker_layer_caching: true
   - attach_workspace:
       at: ./
   - gcr/gcr-auth:
