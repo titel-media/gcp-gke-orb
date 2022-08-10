@@ -58,12 +58,21 @@ parameters:
     description: >
       Extra flags to pass to docker build. For examples, see
       https://docs.docker.com/engine/reference/commandline/build
+  use-remote-docker:
+    description: >
+      Setup a remote Docker engine for Docker commands? Only required
+      if using a Docker-based executor
+    type: boolean
+    default: true
 steps:
   - add_ssh_keys
   - checkout-submodule
-  - setup_remote_docker:
-      version: 20.10.11
-      docker_layer_caching: true
+  - when:
+      condition: <<parameters.use-remote-docker>>
+      steps:
+        - setup_remote_docker:
+            version: 20.10.11
+            docker_layer_caching: true
   - attach_workspace:
       at: ./
   - gcr/gcr-auth:
