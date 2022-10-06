@@ -28,7 +28,8 @@ workflows:
               ignore: main
             tags:
               ignore: /.*/
-          context: orb-publishing
+          context:
+            - orb-publishing
       - publish:
           requires:
             - test
@@ -36,7 +37,8 @@ workflows:
             <<: *semver_tags
             branches:
               ignore: /.*/
-          context: orb-publishing
+          context:
+            - orb-publishing
 
 jobs:
   pack:
