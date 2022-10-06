@@ -1,26 +1,7 @@
-description: "Update cluster with new Docker image."
+description: "Build and publish Docker image."
 docker:
   - image: google/cloud-sdk:377.0.0
-circleci_ip_ranges: true
 parameters:
-  cluster:
-    description: "The Kubernetes cluster name."
-    type: string
-  deployment:
-    description: "The Kubernetes deployment name."
-    type: string
-    default: ""
-  namespace:
-    description: "The Kubernetes namespace name."
-    type: string
-    default: "default"
-  container:
-    description: "The Kubernetes container name."
-    type: string
-  gcloud-service-key:
-    description: The gcloud service key
-    type: env_var_name
-    default: GCLOUD_SERVICE_KEY
   google-project-id:
     description: The Google project ID to connect with via the gcloud CLI
     type: env_var_name
@@ -40,10 +21,6 @@ parameters:
     description: A docker image tag
     type: string
     default: "latest"
-  stable-tag:
-    description: A docker image tag added after a successful image rollout
-    type: string
-    default: "$CIRCLE_BRANCH.stable"
   cwd-path-for-build:
     description: The relative path from where docker will start the build of the image
     type: string
@@ -83,26 +60,3 @@ steps:
       google-project-id: <<parameters.google-project-id>>
       image: <<parameters.image>>
       tag: <<parameters.tag>>
-  - get-cluster-credentials:
-      cluster: "<<parameters.cluster>>"
-  - rollout-image:
-      deployment: "<<parameters.deployment>>"
-      namespace: "<<parameters.namespace>>"
-      container: "<<parameters.container>>"
-      image: "<<parameters.registry-url>>/$<<parameters.google-project-id>>/<<parameters.image>>:<<parameters.tag>>"
-  - gcr/tag-image:
-      registry-url: <<parameters.registry-url>>
-      google-project-id: <<parameters.google-project-id>>
-      image: <<parameters.image>>
-      source-tag: <<parameters.tag>>
-      target-tag: "<<parameters.stable-tag>>"
-  - notify-datadog:
-      image: "<<parameters.image>>:<<parameters.tag>>"
-  - notify-sentry:
-      version: "$CIRCLE_PROJECT_REPONAME:<<parameters.tag>>"
-  - notify-slack:
-      text: "Deployed *<<parameters.image>>:<<parameters.tag>>*
-
-        <$CIRCLE_BUILD_URL|Build> by: <https://github.com/$CIRCLE_USERNAME|$CIRCLE_USERNAME>
-
-        message: $GIT_COMMIT_DESC"
