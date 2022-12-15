@@ -1,6 +1,6 @@
 description: "Update cluster with new Docker image."
 docker:
-  - image: google/cloud-sdk:377.0.0
+  - image: google/cloud-sdk:412.0.0
 circleci_ip_ranges: true
 parameters:
   cluster:

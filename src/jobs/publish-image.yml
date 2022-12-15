@@ -1,6 +1,6 @@
 description: "Build and publish Docker image."
 docker:
-  - image: google/cloud-sdk:377.0.0
+  - image: google/cloud-sdk:412.0.0
 parameters:
   google-project-id:
     description: The Google project ID to connect with via the gcloud CLI
