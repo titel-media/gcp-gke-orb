@@ -14,7 +14,6 @@ The following environment variables need to be set in CircleCI either directly o
 
 See [CircleCI Documentation](https://circleci.com/docs/2.0/env-vars) for instructions on how you would set this up.
 
-
 ## Usage
 
 Example use as well as a list of available executors, commands, and jobs are available on this orb's [registry page][reg-page].
